@@ -11,7 +11,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Estilo CSS personalizado para alinearse a la identidad corporativa de R&V Motor
+# Estilos corporativos
 st.markdown("""
     <style>
     .main-title {
@@ -30,21 +30,18 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Encabezado Principal
 st.markdown('<div class="main-title">🏍️ R&V Motor — CRM Analytics</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">Sistema Inteligente de Orquestación Comercial y Analítica en Tiempo Real</div>', unsafe_allow_html=True)
 st.markdown("--- ")
 
-# 2. CARGA DE DATOS CON CONFIGURACIÓN HÍBRIDA TOLERANTE A FALLOS
+# 2. CARGA DE DATOS TOLERANTE A FALLOS
 @st.cache_data
 def cargar_datos():
     ruta_csv = 'mensajes_clasificados_ia.csv'
     if os.path.exists(ruta_csv):
-        # Leer CSV
         df_real = pd.read_csv(ruta_csv, sep=None, engine='python')
         df_real.columns = df_real.columns.str.strip()
 
-        # Mapeo inteligente de variantes de columnas
         mapeo_columnas = {
             'interes_ia': ['Interes_IA', 'clasificacion_ia', 'interes_ia', 'intencion', 'clasificacion'],
             'motivo_semantico': ['Motivo_Semantico', 'motivo_analisis', 'motivo_semantico', 'motivo'],
@@ -64,7 +61,7 @@ def cargar_datos():
             )
         return df_real
 
-    # Dataset de respaldo sintético realista para desarrollo local si no hay CSV
+    # Datos simulados si el CSV no existe localmente
     ahora = pd.Timestamp.now()
     fechas = [(ahora - pd.Timedelta(minutes=15 * i)).strftime('%Y-%m-%d %H:%M:%S') for i in range(25)]
     import random
@@ -72,21 +69,20 @@ def cargar_datos():
     return pd.DataFrame({
         'Fecha_Hora': fechas,
         'Telefono_Anonimizado': [f'WhatsApp: +502XXXX{random.randint(1000, 9999)}' for _ in range(25)],
-        'Mensaje': ['Me interesa comprar una moto hoy mismo' if i % 4 == 0 else '¿Qué horarios tienen?' for i in range(25)],
+        'Mensaje': ['Me interesa comprar una moto' if i % 4 == 0 else '¿Qué precio tiene?' for i in range(25)],
         'interes_ia': [random.choice(categorias) for _ in range(25)],
-        'motivo_semantico': ['Interés en financiamiento' for _ in range(25)],
-        'respuesta_automatica': ['¡Hola! Con gusto te ayudamos hoy...'] * 25
+        'motivo_semantico': ['Interés general' for _ in range(25)],
+        'respuesta_automatica': ['¡Hola! En un momento te atendemos...'] * 25
     })
 
 df = cargar_datos()
 
-# Asegurar que Fecha_Hora sea tipo datetime para la gráfica de líneas
 if 'Fecha_Hora' in df.columns:
     df['Fecha_Hora_dt'] = pd.to_datetime(df['Fecha_Hora'], errors='coerce')
 else:
     df['Fecha_Hora_dt'] = pd.Timestamp.now()
 
-# 3. LÓGICA DE MATEMÁTICA FINANCIERA (Criterios de Aceptación de la Especificación de Maestría)
+# 3. MATEMÁTICA FINANCIERA
 def calcular_ingreso(row):
     cat = str(row['interes_ia']).strip()
     if cat == 'Lead Caliente': return 2500.0
@@ -116,12 +112,12 @@ if 'mensaje_texto' in df.columns:
 if 'id_cliente' in df.columns:
     df.rename(columns={'id_cliente': 'ID'}, inplace=True)
 
-# 4. RENDERS DE LA BARRA LATERAL (Filtros del Líder Comercial)
+# 4. BARRA LATERAL
 st.sidebar.title("R&V Motor CRM")
 st.sidebar.caption("Módulo de Inteligencia Artificial")
 st.sidebar.markdown("--- ")
 
-st.sidebar.subheader("🔍 Filtros Globales")
+st.sidebar.subheader("🔍 Filtros")
 categorias_disponibles = ['Lead Caliente', 'Cliente Potencial', 'Cliente que Solo Pregunta', 'Lead Frío']
 categorias_seleccionadas = st.sidebar.multiselect(
     "Filtrar por Clasificación IA:",
@@ -129,17 +125,15 @@ categorias_seleccionadas = st.sidebar.multiselect(
     default=categorias_disponibles
 )
 
-# Filtrado dinámico del dataframe
 df_filtrado = df[df['interes_ia'].isin(categorias_seleccionadas)]
 
-# 5. PANEL DE MÉTRICAS ANALÍTICAS (KPIs en Tiempo Real con Tasa de Conversión)
+# 5. METRICAS / KPIs
 total_leads = len(df_filtrado)
 leads_calientes = len(df_filtrado[df_filtrado['interes_ia'] == 'Lead Caliente'])
 leads_potenciales = len(df_filtrado[df_filtrado['interes_ia'] == 'Cliente Potencial'])
 ingreso_total = df_filtrado['Ingreso_Estimado'].sum()
 roi_promedio = df_filtrado[df_filtrado['interes_ia'].isin(['Lead Caliente', 'Cliente Potencial'])]['ROI_Numerico'].mean() if len(df_filtrado[df_filtrado['interes_ia'].isin(['Lead Caliente', 'Cliente Potencial'])]) > 0 else -100.0
 
-# Tasa de Conversión: Leads de valor comercial (Caliente + Potencial) sobre el total
 tasa_conversion = 0.0
 if total_leads > 0:
     tasa_conversion = ((leads_calientes + leads_potenciales) / total_leads) * 100.0
@@ -154,14 +148,13 @@ with col3:
 with col4:
     st.metric(label="💰 Ingreso Estimado", value=f"US$ {ingreso_total:,.2f}")
 with col5:
-    st.metric(label="📈 ROI Promedio (Activos)", value=f"{roi_promedio:.1f}%")
+    st.metric(label="📈 ROI Promedio", value=f"{roi_promedio:.1f}%")
 
 st.markdown("--- ")
 
-# 6. CAPA VISUAL NAVEGABLE MEDIANTE PESTAÑAS (TABS)
+# 6. PESTAÑAS (TABS) - DISEÑO GRÁFICO CORREGIDO
 tab_general, tab_temporal = st.tabs(["📊 Métricas y Proporciones", "📈 Evolución Temporal de Leads"])
 
-# Definir colores institucionales de R&V Motor para consistencia visual
 colores_map = {
     'Lead Caliente': '#D32F2F',
     'Cliente Potencial': '#FBC02D',
@@ -170,16 +163,15 @@ colores_map = {
 }
 
 with tab_general:
-    col_chart_container, col_filters_side = st.columns([3, 1])
-    
+    # Usamos una división perfecta 1:1 para que las dos columnas tengan exactamente el mismo tamaño
+    col_chart_container, col_filters_side = st.columns([1, 1])
+
     with col_chart_container:
         st.subheader("Volumen de Interacciones por Intención")
         if not df_filtrado.empty:
-            # Agrupación por categoría comercial
             df_conteo = df_filtrado['interes_ia'].value_counts().reset_index()
             df_conteo.columns = ['interes_ia', 'Cantidad']
-            
-            # Gráfico de barras dinámico con escala natural de Y y leyendas activas
+
             fig_bar = px.bar(
                 df_conteo,
                 x='interes_ia',
@@ -189,12 +181,13 @@ with tab_general:
                 color_discrete_map=colores_map,
                 labels={'interes_ia': 'Clasificación Comercial', 'Cantidad': 'Total Clientes'}
             )
-            
+
             fig_bar.update_traces(
                 textposition='outside',
                 textfont_size=14,
                 cliponaxis=False
             )
+            # Mantiene la escala de barras dinámica y natural, y reactiva la leyenda interactiva (showlegend=True)
             fig_bar.update_layout(
                 showlegend=True,
                 margin=dict(t=30, b=10, l=10, r=10)
@@ -202,9 +195,9 @@ with tab_general:
             st.plotly_chart(fig_bar, use_container_width=True)
         else:
             st.info("Selecciona categorías para generar la gráfica.")
-            
+
     with col_filters_side:
-        st.markdown("### 🎯 Distribución")
+        st.subheader("Proporción de Conversión de Clientes")
         if not df_filtrado.empty:
             fig_pie = px.pie(
                 df_filtrado,
@@ -212,24 +205,24 @@ with tab_general:
                 hole=0.4,
                 color='interes_ia',
                 color_discrete_map=colores_map
-            ) 
+            )
+            # Muestra leyenda en el gráfico de pastel
             fig_pie.update_layout(
-                margin=dict(t=10, b=10, l=10, r=10),
+                margin=dict(t=30, b=10, l=10, r=10),
                 showlegend=True
             )
             st.plotly_chart(fig_pie, use_container_width=True)
+        else:
+            st.info("No hay datos para mostrar la proporción.")
 
 with tab_temporal:
-    st.subheader("Evolución Comercial de Leads en el Tiempo (Histórico por Horas)")
+    st.subheader("Evolución Comercial de Leads en el Tiempo")
     if not df_filtrado.empty and 'Fecha_Hora_dt' in df_filtrado.columns:
-        # Agrupamos y ordenamos cronológicamente para evitar superposición caótica de líneas
         df_linea = df_filtrado.copy()
         df_linea['Fecha_Agrupada'] = df_linea['Fecha_Hora_dt'].dt.strftime('%Y-%m-%d %H:00')
-        
-        # Agrupar por fecha y clasificación para obtener una línea continua por categoría
         df_tendencia = df_linea.groupby(['Fecha_Agrupada', 'interes_ia']).size().reset_index(name='Cantidad_Leads')
         df_tendencia = df_tendencia.sort_values(by='Fecha_Agrupada')
-        
+
         fig_line = px.line(
             df_tendencia,
             x='Fecha_Agrupada',
@@ -237,7 +230,7 @@ with tab_temporal:
             color='interes_ia',
             markers=True,
             color_discrete_map=colores_map,
-            labels={'Fecha_Agrupada': 'Fecha y Hora', 'Cantidad_Leads': 'Cantidad de Mensajes', 'interes_ia': 'Categoría'}
+            labels={'Fecha_Agrupada': 'Fecha y Hora', 'Cantidad_Leads': 'Cantidad de Mensajes'}
         )
         fig_line.update_layout(
             xaxis_tickangle=-45,
@@ -245,11 +238,11 @@ with tab_temporal:
         )
         st.plotly_chart(fig_line, use_container_width=True)
     else:
-        st.info("No hay datos suficientes para graficar la evolución temporal en este rango seleccionado.")
+        st.info("No hay datos suficientes para graficar la evolución temporal.")
 
 st.markdown("--- ")
 
-# 7. TABLA DE REGISTROS CON PRIVACIDAD BLINDADA
+# 7. TABLA DE REGISTROS
 st.subheader("📋 Historial de Interacciones del Chatbot")
 columnas_tabla = ['Telefono_Anonimizado', 'Mensaje', 'interes_ia', 'motivo_semantico', 'Ingreso_Estimado', 'respuesta_automatica']
 columnas_existentes = [col for col in columnas_tabla if col in df_filtrado.columns]
