@@ -117,4 +117,145 @@ if 'id_cliente' in df.columns:
     df.rename(columns={'id_cliente': 'ID'}, inplace=True)
 
 # 4. RENDERS DE LA BARRA LATERAL (Filtros del Líder Comercial)
-st.sidebar.title(
+st.sidebar.title("R&V Motor CRM")
+st.sidebar.caption("Módulo de Inteligencia Artificial")
+st.sidebar.markdown("--- ")
+
+st.sidebar.subheader("🔍 Filtros Globales")
+categorias_disponibles = ['Lead Caliente', 'Cliente Potencial', 'Cliente que Solo Pregunta', 'Lead Frío']
+categorias_seleccionadas = st.sidebar.multiselect(
+    "Filtrar por Clasificación IA:",
+    categorias_disponibles,
+    default=categorias_disponibles
+)
+
+# Filtrado dinámico del dataframe
+df_filtrado = df[df['interes_ia'].isin(categorias_seleccionadas)]
+
+# 5. PANEL DE MÉTRICAS ANALÍTICAS (KPIs en Tiempo Real con Tasa de Conversión)
+total_leads = len(df_filtrado)
+leads_calientes = len(df_filtrado[df_filtrado['interes_ia'] == 'Lead Caliente'])
+leads_potenciales = len(df_filtrado[df_filtrado['interes_ia'] == 'Cliente Potencial'])
+ingreso_total = df_filtrado['Ingreso_Estimado'].sum()
+roi_promedio = df_filtrado[df_filtrado['interes_ia'].isin(['Lead Caliente', 'Cliente Potencial'])]['ROI_Numerico'].mean() if len(df_filtrado[df_filtrado['interes_ia'].isin(['Lead Caliente', 'Cliente Potencial'])]) > 0 else -100.0
+
+# Tasa de Conversión: Leads de valor comercial (Caliente + Potencial) sobre el total
+tasa_conversion = 0.0
+if total_leads > 0:
+    tasa_conversion = ((leads_calientes + leads_potenciales) / total_leads) * 100.0
+
+col1, col2, col3, col4, col5 = st.columns(5)
+with col1:
+    st.metric(label="🔥 Leads Calientes", value=f"{leads_calientes} leads")
+with col2:
+    st.metric(label="⚡ Clientes Potenciales", value=f"{leads_potenciales} leads")
+with col3:
+    st.metric(label="📊 Tasa de Conversión", value=f"{tasa_conversion:.1f}%")
+with col4:
+    st.metric(label="💰 Ingreso Estimado", value=f"US$ {ingreso_total:,.2f}")
+with col5:
+    st.metric(label="📈 ROI Promedio (Activos)", value=f"{roi_promedio:.1f}%")
+
+st.markdown("--- ")
+
+# 6. CAPA VISUAL NAVEGABLE MEDIANTE PESTAÑAS (TABS)
+tab_general, tab_temporal = st.tabs(["📊 Métricas y Proporciones", "📈 Evolución Temporal de Leads"])
+
+# Definir colores institucionales de R&V Motor para consistencia visual
+colores_map = {
+    'Lead Caliente': '#D32F2F',
+    'Cliente Potencial': '#FBC02D',
+    'Cliente que Solo Pregunta': '#1976D2',
+    'Lead Frío': '#9E9E9E'
+}
+
+with tab_general:
+    col_chart_container, col_filters_side = st.columns([3, 1])
+    
+    with col_chart_container:
+        st.subheader("Volumen de Interacciones por Intención")
+        if not df_filtrado.empty:
+            # Agrupación por categoría comercial
+            df_conteo = df_filtrado['interes_ia'].value_counts().reset_index()
+            df_conteo.columns = ['interes_ia', 'Cantidad']
+            
+            # Gráfico de barras dinámico con escala natural de Y y leyendas activas
+            fig_bar = px.bar(
+                df_conteo,
+                x='interes_ia',
+                y='Cantidad',
+                color='interes_ia',
+                text='Cantidad',
+                color_discrete_map=colores_map,
+                labels={'interes_ia': 'Clasificación Comercial', 'Cantidad': 'Total Clientes'}
+            )
+            
+            fig_bar.update_traces(
+                textposition='outside',
+                textfont_size=14,
+                cliponaxis=False
+            )
+            fig_bar.update_layout(
+                showlegend=True,
+                margin=dict(t=30, b=10, l=10, r=10)
+            )
+            st.plotly_chart(fig_bar, use_container_width=True)
+        else:
+            st.info("Selecciona categorías para generar la gráfica.")
+            
+    with col_filters_side:
+        st.markdown("### 🎯 Distribución")
+        if not df_filtrado.empty:
+            fig_pie = px.pie(
+                df_filtrado,
+                names='interes_ia',
+                hole=0.4,
+                color='interes_ia',
+                color_discrete_map=colores_map
+            ) 
+            fig_pie.update_layout(
+                margin=dict(t=10, b=10, l=10, r=10),
+                showlegend=True
+            )
+            st.plotly_chart(fig_pie, use_container_width=True)
+
+with tab_temporal:
+    st.subheader("Evolución Comercial de Leads en el Tiempo (Histórico por Horas)")
+    if not df_filtrado.empty and 'Fecha_Hora_dt' in df_filtrado.columns:
+        # Agrupamos y ordenamos cronológicamente para evitar superposición caótica de líneas
+        df_linea = df_filtrado.copy()
+        df_linea['Fecha_Agrupada'] = df_linea['Fecha_Hora_dt'].dt.strftime('%Y-%m-%d %H:00')
+        
+        # Agrupar por fecha y clasificación para obtener una línea continua por categoría
+        df_tendencia = df_linea.groupby(['Fecha_Agrupada', 'interes_ia']).size().reset_index(name='Cantidad_Leads')
+        df_tendencia = df_tendencia.sort_values(by='Fecha_Agrupada')
+        
+        fig_line = px.line(
+            df_tendencia,
+            x='Fecha_Agrupada',
+            y='Cantidad_Leads',
+            color='interes_ia',
+            markers=True,
+            color_discrete_map=colores_map,
+            labels={'Fecha_Agrupada': 'Fecha y Hora', 'Cantidad_Leads': 'Cantidad de Mensajes', 'interes_ia': 'Categoría'}
+        )
+        fig_line.update_layout(
+            xaxis_tickangle=-45,
+            margin=dict(t=30, b=10, l=10, r=10)
+        )
+        st.plotly_chart(fig_line, use_container_width=True)
+    else:
+        st.info("No hay datos suficientes para graficar la evolución temporal en este rango seleccionado.")
+
+st.markdown("--- ")
+
+# 7. TABLA DE REGISTROS CON PRIVACIDAD BLINDADA
+st.subheader("📋 Historial de Interacciones del Chatbot")
+columnas_tabla = ['Telefono_Anonimizado', 'Mensaje', 'interes_ia', 'motivo_semantico', 'Ingreso_Estimado', 'respuesta_automatica']
+columnas_existentes = [col for col in columnas_tabla if col in df_filtrado.columns]
+
+st.dataframe(
+    df_filtrado[columnas_existentes],
+    use_container_width=True,
+    hide_index=True
+)
