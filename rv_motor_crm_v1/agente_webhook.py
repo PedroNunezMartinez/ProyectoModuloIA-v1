@@ -1,144 +1,147 @@
-
 import os
 import csv
-from flask import Flask, request
-from twilio.twiml.messaging_response import MessagingResponse
+from datetime import datetime
+from flask import Flask, request, Response
 from google import genai
 from google.genai import types
 from pydantic import BaseModel, Field
-from typing import Literal
+from twilio.rest import Client as TwilioClient
 
 app = Flask(__name__)
 
-# 1. Esquema estructurado Pydantic para la IA
-class AnalisisInteraccion(BaseModel):
-    clasificacion: Literal['Lead Caliente', 'Cliente Potencial', 'Cliente que Solo Pregunta', 'Lead Frío'] = Field(
-        description="Categoría de intención de compra de acuerdo a las reglas de negocio."
+# ==========================================
+# 1. Configuración de Credenciales de Seguridad
+# ==========================================
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
+
+client = None
+twilio_client = None
+
+if GEMINI_API_KEY:
+    client = genai.Client(api_key=GEMINI_API_KEY)
+if TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN:
+    twilio_client = TwilioClient(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+
+# ==========================================
+# 2. Esquema Estricto Pydantic
+# ==========================================
+class ClasificacionLead(BaseModel):
+    interes_ia: str = Field(
+        description="Categoría de clasificación obligatoria: 'Lead Caliente', 'Cliente Potencial', 'Cliente que Solo Pregunta', o 'Lead Frío'."
     )
-    ingreso_estimado: float = Field(
-        description="Ingreso estimado basado en la categoría (Leads Calientes = 2500, Potenciales = 1200, otros = 0)."
-    )
-    roi_estimado: float = Field(
-        description="Retorno de Inversión estimado porcentual (ej: 1566% expresado como 1566.0)."
+    motivo_semantico: str = Field(
+        description="Explicación breve de la clasificación de acuerdo con el mensaje analizado."
     )
     respuesta_automatica: str = Field(
-        description="Respuesta persuasiva, humana y empática en español para WhatsApp, orientada a cerrar la venta."
+        description="Respuesta humana, persuasiva y empática en español orientada a la conversión o resolución de dudas."
     )
 
-# 2. Inicializar cliente de Gemini usando variables de entorno limpias de ciberseguridad
-# NOTA: En producción ejecutar en consola antes: set GEMINI_API_KEY=tu_clave_aquí
-api_key = os.environ.get('GEMINI_API_KEY', '').strip()
-client = genai.Client(api_key=api_key if api_key else None)
+CSV_FILE_PATH = "mensajes_clasificados_ia.csv"
 
-CSV_FILE = 'mensajes_clasificados_ia.csv'
+# ==========================================
+# 3. Lógica Financiera de ROI
+# ==========================================
+def calcular_metricas_financieras(categoria: str):
+    cat_clean = categoria.strip().lower()
+    if "caliente" in cat_clean:
+        return 2500.0, 1566.0, "Alta"
+    elif "potencial" in cat_clean:
+        return 1200.0, 750.0, "Media"
+    elif "pregunta" in cat_clean:
+        return 0.0, -100.0, "Baja"
+    else:
+        return 0.0, -100.0, "Nula"
 
-def inicializar_csv():
-    # Inicializa el archivo CSV histórico si no existe con sus 9 columnas analíticas
-    if not os.path.exists(CSV_FILE):
-        with open(CSV_FILE, mode='w', newline='', encoding='utf-8') as f:
-            writer = csv.writer(f)
-            writer.writerow([
-                'id_interaccion', 'remitente_anonimo', 'mensaje_original',
-                'clasificacion', 'ingreso_estimado', 'roi_estimado',
-                'respuesta_enviada', 'modelo_utilizado', 'estado_entrega'
-            ])
+# ==========================================
+# 4. Registro de Datos Seguro en CSV
+# ==========================================
+def registrar_mensaje_en_csv(telefono, mensaje, categoria, motivo, ingreso, roi, prioridad, respuesta_ia):
+    file_exists = os.path.isfile(CSV_FILE_PATH)
+    telefono_anonimo = f"WhatsApp: +502XXXX{telefono[-4:]}" if len(str(telefono)) >= 4 else "WhatsApp: Oculto"
 
-def anonimizar_telefono(telefono_completo: str) -> str:
-    # Anonimizar el número telefónico para protección de privacidad de datos (C051, etc o enmascarado)
-    if not telefono_completo:
-        return "Anónimo"
-    return f"+XXX-XXXX-{telefono_completo[-4:]}"
-
-@app.route("/webhook", methods=['POST'])
-def webhook():
     try:
-        # Leer payload entrante de Twilio
-        from_number = request.values.get('From', '')
-        body_message = request.values.get('Body', '')
-
-        # Anonimizar número telefónico
-        remitente_anonimo = anonimizar_telefono(from_number)
-
-        # Configurar Prompt del Sistema para R&V Motor de manera segura
-        system_prompt = (
-            "Actúas como el Agente de IA experto de la concesionaria de motocicletas "R&V Motor".
-"
-            "Analiza el contexto del mensaje enviado por el cliente en menos de 3 segundos y clasifícalo en una de estas categorías obligatorias:
-
-"
-            "1. 'Lead Caliente': Intención clara e inmediata de compra (precios específicos, cuotas, financiamiento, métodos de pago, quiere ir hoy mismo con el dinero).
-"
-            "   - Métrica financiera asociada: ingreso_estimado = 2500.00, roi_estimado = 1566.0
-"
-            "2. 'Cliente Potencial': Interés real pero con planes a futuro (agendar citas próxima semana, disponibilidad próximo mes, catálogos generales).
-"
-            "   - Métrica financiera asociada: ingreso_estimado = 1200.00, roi_estimado = 750.0
-"
-            "3. 'Cliente que Solo Pregunta': Soporte o información general operativa sin venta directa (horarios, dirección física, repuestos, vacantes).
-"
-            "   - Métrica financiera asociada: ingreso_estimado = 0.0, roi_estimado = 0.0
-"
-            "4. 'Lead Frío': Negativa, descartes ("No gracias"), emoticones por error o textos sin sentido ajenos a motos.
-"
-            "   - Métrica financiera asociada: ingreso_estimado = 0.0, roi_estimado = 0.0
-
-"
-            "REGLA DE RESPUESTA AUTOMÁTICA: Genera una respuesta persuasiva, humana y empática en español, orientada a cerrar la venta o resolver el soporte."
-        )
-
-        # Consultar Gemini 3.8 Flash de forma estructurada con tolerancia a fallos
-        response = client.models.generate_content(
-            model='gemini-3.8-flash',
-            contents=body_message,
-            config=types.GenerateContentConfig(
-                system_instruction=system_prompt,
-                response_mime_type="application/json",
-                response_schema=AnalisisInteraccion,
-                temperature=0.2
-            )
-        )
-
-        analisis = response.parsed
-
+        with open(CSV_FILE_PATH, mode="a", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f, delimiter=",")
+            if not file_exists:
+                writer.writerow([
+                    "Fecha_Hora", "Telefono_Anonimizado", "Mensaje",
+                    "Interes_IA", "Motivo_Semantico", "Ingreso_Estimado",
+                    "ROI", "Prioridad", "Respuesta_Automatica"
+                ])
+            writer.writerow([
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                telefono_anonimo,
+                mensaje.replace("\n", " "),
+                categoria,
+                motivo,
+                f"{ingreso:.2f}",
+                f"{roi}%",
+                prioridad,
+                respuesta_ia.replace("\n", " ")
+            ])
     except Exception as e:
-        # Caso de tolerancia a fallos (Error HTTP 429/503 o Key vacía): Respuesta de contingencia
-        print(f"Log de Error: Falló la API de Gemini - {e}")
-        analisis = AnalisisInteraccion(
-            clasificacion='Cliente Potencial',
-            ingreso_estimado=1200.0,
-            roi_estimado=750.0,
-            respuesta_automatica="¡Hola! Gracias por contactar a R&V Motor. En este momento estamos experimentando alta demanda, pero un asesor se comunicará contigo de inmediato."
-        )
+        print(f"[ERROR] Error al registrar datos en el CSV: {e}")
 
-    # Guardar en CSV de manera atómica
-    inicializar_csv()
-    try:
-        with open(CSV_FILE, mode='a', newline='', encoding='utf-8') as f:
-            writer = csv.writer(f)
-            # Generar identificador correlativo simple de interacción basándose en el tamaño
-            line_count = sum(1 for line in open(CSV_FILE)) if os.path.exists(CSV_FILE) else 1
-            id_interaccion = f"C{line_count:03d}"
+# ==========================================
+# 5. Endpoint del Webhook (POST)
+# ==========================================
+@app.route("/webhook", methods=["POST"])
+def webhook():
+    sender_phone = request.values.get("From", "Unknown")
+    incoming_msg = request.values.get("Body", "").strip()
 
-            writer.writerow([
-                id_interaccion,
-                remitente_anonimo,
-                body_message,
-                analisis.clasificacion,
-                analisis.ingreso_estimado,
-                analisis.roi_estimado,
-                analisis.respuesta_automatica,
-                'gemini-3.8-flash',
-                'Entregado'
-            ])
-    except Exception as csv_err:
-        print(f"Error guardando métricas en base CSV: {csv_err}")
+    categoria_final = "Lead Frío"
+    motivo_final = "Bypass por error del sistema de IA"
+    respuesta_final = "Hola, en este momento experimentamos alta demanda. Un asesor humano de R&V Motor se comunicará contigo pronto."
 
-    # Responder a Twilio para entregar respuesta por WhatsApp en menos de 3 segundos
-    twilio_response = MessagingResponse()
-    twilio_response.message(analisis.respuesta_automatica)
-    return str(twilio_response)
+    if client and incoming_msg:
+        try:
+            system_prompt = """
+            Actúas como el Agente de IA experto de la concesionaria de motocicletas "R&V Motor".
+            Analiza el contexto del mensaje enviado por el cliente en menos de 3 segundos y clasifícalo en una de estas categorías obligatorias:
+            1. 'Lead Caliente': Intención clara e inmediata de compra.
+            2. 'Cliente Potencial': Interés real pero con planes a futuro.
+            3. 'Cliente que Solo Pregunta': Soporte o información general operativa.
+            4. 'Lead Frío': Negativa, descartes o textos sin sentido.
+            """
+
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=incoming_msg,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_prompt,
+                    response_mime_type="application/json",
+                    response_schema=ClasificacionLead,
+                    temperature=0.2
+                )
+            )
+
+            analisis = response.parsed
+            categoria_final = analisis.interes_ia
+            motivo_final = analisis.motivo_semantico
+            respuesta_final = analisis.respuesta_automatica
+
+        except Exception as e:
+            print(f"[LOG] Error de llamada API Gemini: {e}")
+
+    ingreso, roi, prioridad = calcular_metricas_financieras(categoria_final)
+    registrar_mensaje_en_csv(sender_phone, incoming_msg, categoria_final, motivo_final, ingreso, roi, prioridad, respuesta_final)
+
+    if twilio_client and sender_phone != "Unknown":
+        try:
+            twilio_client.messages.create(
+                body=str(respuesta_final),
+                from_=request.values.get("To", "whatsapp:+14155238886"),
+                to=sender_phone
+            )
+        except Exception as e:
+            print(f"[LOG] Error de envío de Twilio: {e}")
+
+    resp = Response("<Response></Response>", mimetype="text/xml")
+    resp.headers["ngrok-skip-browser-warning"] = "true"
+    return resp
 
 if __name__ == "__main__":
-    inicializar_csv()
-    # Ejecutar servidor local de desarrollo en puerto 5000
     app.run(port=5000, debug=True)
