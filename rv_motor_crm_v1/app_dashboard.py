@@ -64,16 +64,18 @@ def cargar_datos():
             )
         return df_real
 
-    # Dataset de respaldo sintético si no se encuentra el archivo físico
+    # Dataset de respaldo sintético realista para desarrollo local si no hay CSV
     ahora = pd.Timestamp.now()
-    fechas = [(ahora - pd.Timedelta(hours=i)).strftime('%Y-%m-%d %H:%M:%S') for i in range(12)]
+    fechas = [(ahora - pd.Timedelta(minutes=15 * i)).strftime('%Y-%m-%d %H:%M:%S') for i in range(25)]
+    import random
+    categorias = ['Lead Caliente', 'Cliente Potencial', 'Cliente que Solo Pregunta', 'Lead Frío']
     return pd.DataFrame({
         'Fecha_Hora': fechas,
-        'Telefono_Anonimizado': ['WhatsApp: +502XXXX1234'] * 12,
-        'Mensaje': ['Hola, me interesa la moto'] * 12,
-        'interes_ia': ['Lead Caliente', 'Cliente Potencial', 'Cliente que Solo Pregunta', 'Lead Frío'] * 3,
-        'motivo_semantico': ['Interés inmediato', 'Pregunta plazos', 'Horarios de atención', 'No responde'] * 3,
-        'respuesta_automatica': ['¡Hola! Con gusto te ayudamos...'] * 12
+        'Telefono_Anonimizado': [f'WhatsApp: +502XXXX{random.randint(1000, 9999)}' for _ in range(25)],
+        'Mensaje': ['Me interesa comprar una moto hoy mismo' if i % 4 == 0 else '¿Qué horarios tienen?' for i in range(25)],
+        'interes_ia': [random.choice(categorias) for _ in range(25)],
+        'motivo_semantico': ['Interés en financiamiento' for _ in range(25)],
+        'respuesta_automatica': ['¡Hola! Con gusto te ayudamos hoy...'] * 25
     })
 
 df = cargar_datos()
@@ -119,7 +121,7 @@ st.sidebar.title("R&V Motor CRM")
 st.sidebar.caption("Módulo de Inteligencia Artificial")
 st.sidebar.markdown("--- ")
 
-st.sidebar.subheader("🔍 Filtros del Embudo")
+st.sidebar.subheader("🔍 Filtros Globales")
 categorias_disponibles = ['Lead Caliente', 'Cliente Potencial', 'Cliente que Solo Pregunta', 'Lead Frío']
 categorias_seleccionadas = st.sidebar.multiselect(
     "Filtrar por Clasificación IA:",
@@ -137,7 +139,7 @@ leads_potenciales = len(df_filtrado[df_filtrado['interes_ia'] == 'Cliente Potenc
 ingreso_total = df_filtrado['Ingreso_Estimado'].sum()
 roi_promedio = df_filtrado[df_filtrado['interes_ia'].isin(['Lead Caliente', 'Cliente Potencial'])]['ROI_Numerico'].mean() if len(df_filtrado[df_filtrado['interes_ia'].isin(['Lead Caliente', 'Cliente Potencial'])]) > 0 else -100.0
 
-# Cálculo robusto de la Tasa de Conversión (Leads valiosos sobre el total de leads activos)
+# Tasa de Conversión: Leads de valor comercial (Caliente + Potencial) sobre el total
 tasa_conversion = 0.0
 if total_leads > 0:
     tasa_conversion = ((leads_calientes + leads_potenciales) / total_leads) * 100.0
@@ -150,7 +152,7 @@ with col2:
 with col3:
     st.metric(label="📊 Tasa de Conversión", value=f"{tasa_conversion:.1f}%")
 with col4:
-    st.metric(label="💰 Ingreso Estimado Acumulado", value=f"US$ {ingreso_total:,.2f}")
+    st.metric(label="💰 Ingreso Estimado", value=f"US$ {ingreso_total:,.2f}")
 with col5:
     st.metric(label="📈 ROI Promedio (Activos)", value=f"{roi_promedio:.1f}%")
 
@@ -168,20 +170,22 @@ colores_map = {
 }
 
 with tab_general:
-    col_chart1, col_colchart2 = st.columns(2)
+    col_chart_container, col_filters_side = st.columns([3, 1])
     
-    with col_chart1:
-        st.subheader("Volumen de Interacciones por Intención (Barras Dinámicas)")
+    with col_chart_container:
+        st.subheader("Volumen de Interacciones por Intención")
         if not df_filtrado.empty:
+            # Agrupación por categoría comercial
             df_conteo = df_filtrado['interes_ia'].value_counts().reset_index()
             df_conteo.columns = ['interes_ia', 'Cantidad']
             
+            # Crear el gráfico de barras dinámico con el eje Y y etiquetas reales
             fig_bar = px.bar(
                 df_conteo,
                 x='interes_ia',
                 y='Cantidad',
                 color='interes_ia',
-                text='Cantidad',  # Muestra el número exacto sobre cada barra
+                text='Cantidad',  # Muestra el número real y dinámico sobre cada barra
                 color_discrete_map=colores_map,
                 labels={'interes_ia': 'Clasificación Comercial', 'Cantidad': 'Total Clientes'}
             )
@@ -191,17 +195,19 @@ with tab_general:
                 textfont_size=14,
                 cliponaxis=False
             )
+            # El eje Y ahora se ajusta automáticamente al número máximo real más un margen de holgura
             fig_bar.update_layout(
-                yaxis=dict(title='Cantidad de Leads', range=[0, max(df_conteo['Cantidad'].max() + 2, 5)]),
+                yaxis=dict(title='Cantidad de Leads', range=[0, int(df_conteo['Cantidad'].max() + 3)]),
                 showlegend=False,
                 margin=dict(t=30, b=10, l=10, r=10)
             )
             st.plotly_chart(fig_bar, use_container_width=True)
         else:
-            st.info("Selecciona categorías en la barra lateral para generar la gráfica.")
-
-    with col_colchart2:
-        st.subheader("Proporción de Conversión de Clientes (Distribución)")
+            st.info("Selecciona categorías para generar la gráfica.")
+            
+    with col_filters_side:
+        st.markdown("### 🛠️ Configuración Local")
+        st.markdown("Visualiza la distribución porcentual de leads de alto valor en tiempo real.")
         if not df_filtrado.empty:
             fig_pie = px.pie(
                 df_filtrado,
@@ -210,17 +216,19 @@ with tab_general:
                 color='interes_ia',
                 color_discrete_map=colores_map
             )
-            fig_pie.update_layout(margin=dict(t=30, b=10, l=10, r=10))
+            fig_pie.update_layout(margin=dict(t=10, b=10, l=10, r=10), showlegend=False)
             st.plotly_chart(fig_pie, use_container_width=True)
-        else:
-            st.info("No hay datos para la proporción de conversión.")
 
 with tab_temporal:
-    st.subheader("Evolución Comercial de Leads en el Tiempo")
+    st.subheader("Evolución Comercial de Leads en el Tiempo (Histórico por Horas)")
     if not df_filtrado.empty and 'Fecha_Hora_dt' in df_filtrado.columns:
+        # Agrupamos y ordenamos cronológicamente para evitar superposición caótica de líneas
         df_linea = df_filtrado.copy()
         df_linea['Fecha_Agrupada'] = df_linea['Fecha_Hora_dt'].dt.strftime('%Y-%m-%d %H:00')
+        
+        # Agrupar por fecha y clasificación para obtener una línea continua por categoría
         df_tendencia = df_linea.groupby(['Fecha_Agrupada', 'interes_ia']).size().reset_index(name='Cantidad_Leads')
+        df_tendencia = df_tendencia.sort_values(by='Fecha_Agrupada')
         
         fig_line = px.line(
             df_tendencia,
@@ -233,7 +241,7 @@ with tab_temporal:
         )
         fig_line.update_layout(
             xaxis_tickangle=-45,
-            yaxis=dict(title='Mensajes Recibidos'),
+            yaxis=dict(title='Mensajes Recibidos', range=[0, int(df_tendencia['Cantidad_Leads'].max() + 2)]),
             margin=dict(t=30, b=10, l=10, r=10)
         )
         st.plotly_chart(fig_line, use_container_width=True)
