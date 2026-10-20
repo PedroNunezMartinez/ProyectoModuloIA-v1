@@ -1,4 +1,18 @@
 Version:1.0StartHTML:0000000105EndHTML:0000046899StartFragment:0000038501EndFragment:0000046859<style></style>
+├── rv_motor_crm/  (Directorio Principal del MVP)
+  │   ├── agente_clasificador.ipynb   (Notebook experimental de Colab)
+  │   ├── agente_webhook.py           (Orquestador Backend en Flask)
+  │   ├── app.py                      (Script auxiliar del microservicio)
+  │   ├── app_dashboard.py            (Frontend e interfaz en Streamlit)
+  │   ├── logo_rv.png                 (Identidad visual e imagen corporativa)
+  │   ├── mensajes_clasificados_ia.csv (Base de datos persistente por comas)
+  │   ├── requirements.txt            (Congelamiento de librerías y SDKs)
+  │   ├── README.md                   (Documentación principal con salvaguarda)
+  │   ├── especificacion.md           (Especificación técnica del ecosistema)
+  │   ├── AGENTS.md                   (Reglas de control de prompts para agentes)
+  │   └── pitch.md                    (Matriz de pruebas y pitch ejecutivo)
+  ├── app.py                          (Práctica general de la raíz)
+
 
 # AGENTS.md· CRM AI Webhook Orchestrator & Dashboard (R&V Motor)
 
