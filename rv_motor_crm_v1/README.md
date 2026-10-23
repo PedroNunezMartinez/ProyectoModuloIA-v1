@@ -97,7 +97,7 @@ En estricto cumplimiento con el marco de integridad académica de la Maestría e
 ---
 
 ## 🚀 Escalabilidad Comercial Futura
-La arquitectura de software propuesta desacopla totalmente el canal de mensajería del motor de IA. Esto garantizará que, tras concluir el módulo académico, el prototipo pueda escalarse e integrarse directamente a los canales de producción reales de la empresa: **WhatsApp Business API (Oficial)**, **Instagram Graph API**, **Facebook Messenger** y CRMs corporativos (como HubSpot o Zoho CRM) mediante Webhooks estables de alta disponibilidad.
+La arquitectura de software propuesta desacopla totalmente el canal de mensajería del motor de IA. Esto garantizará que, tras concluir el módulo académico, el prototipo pueda escalarse e integrarse directamente a los canales de producción reales de la empresa: **WhatsApp Business API (Oficial)**, **Instagram Graph API**, **Facebook Messenger** y CRMs corporativos (como HubSpot,Manychat, Kommo o Zoho CRM) mediante Webhooks estables de alta disponibilidad.
 
 ---
 
