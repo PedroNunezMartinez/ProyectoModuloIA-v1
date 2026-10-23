@@ -180,7 +180,6 @@ Version:1.0StartHTML:0000000105EndHTML:0000049168StartFragment:0000038720EndFrag
 
     ## 🚀 Escalabilidad Comercial Futura
 
-    ---
 
     La arquitectura desoftware propuesta desacopla totalmente el canal de mensajería del motor de IA.Esto garantizará que, tras concluir el módulo académico, el prototipo puedaescalarse e integrarse directamente a los canales de producción reales de la empresa:**WhatsApp Business API (Oficial)**, **Instagram Graph API**, **FacebookMessenger** y CRMs corporativos (como HubSpot,Manychat, Kommo o Zoho CRM)mediante Webhooks estables de alta disponibilidad.
 
@@ -188,7 +187,6 @@ Version:1.0StartHTML:0000000105EndHTML:0000049168StartFragment:0000038720EndFrag
 
     ## 🛠️Instrucciones de Evaluación para el Docente
 
-    ---
 
     En estrictocumplimiento con el marco de integridad académica de la Maestría en IA, sedeclara formalmente la metodología implementada en el uso de herramientasgenerativas:
 
