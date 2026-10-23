@@ -82,7 +82,7 @@ La fórmula del ROI del sistema se define como:
 $$\text{ROI} = \left( \frac{\text{Ingreso Estimado Total} - \text{Costo de Marketing}}{\text{Costo de Marketing}} \right) \times 100$$
 
 *Nota técnica: Ante un único 'Lead Caliente' individual, el sistema procesa un valor flotante exacto de **15.66666667**, lo que equivale a un **1566% de ROI** directo frente al costo de inversión.*
-
+---
 ## 📈 Procesamiento Analítico en Frontend (Código Streamlit):
 La lógica de negocio descrita se implementa directamente en `app_dashboard.py` para proyectar las métricas mediante la siguiente estructura de código:
 ```python
@@ -143,7 +143,7 @@ La arquitectura de software propuesta desacopla totalmente el canal de mensajer�
 
 ---
 
-# 🛠️ Instrucciones de Evaluación para el Docente
+## 🛠️ Instrucciones de Evaluación para el Docente
 En estricto cumplimiento con el marco de integridad académica de la Maestría en IA, se declara formalmente la metodología implementada en el uso de herramientas generativas:
 
 * **Desarrollo y Laboratorio Independiente (Google Colab):** Las fases experimentales de calibración lógica, optimización de hiperparámetros de temperatura, pruebas del prompt de sistema y la inyección sintética del lote inicial de 50 leads se ejecutaron de manera autónoma en cuadernos de Google Colab bajo la estricta autoría intelectual del desarrollador.
