@@ -50,7 +50,7 @@ El diseño lógico del prompt instruye al agente a evaluar las intenciones de co
 El proyecto se compone de una suite de componentes principales diseñados bajo un entorno híbrido de ejecución. El componente `agente_webhook.py` no se ejecuta directamente en GitHub, sino en la máquina local del desarrollador con el apoyo de una arquitectura de red segura para simular la interacción que se generaría tras publicar una promoción en redes sociales (Instagram, Facebook y WhatsApp).
 
 #### Componentes de la Suite e Infraestructura Desplegada:
-* **App.py:** Archivo de inicio empleado para desplegar y enlazar la interfaz analítica con Streamlit.
+* **App.py/app_dashboard.py:** Archivo de inicio empleado para desplegar y enlazar la interfaz analítica con Streamlit.
 * **Agente_clasificador.ipynb:** Cuaderno de notas utilizado para generar de forma automatizada 50 interacciones sintéticas con las que se pobló la base de datos inicial del dashboard.
 * **Agente_webhook.py:** Agente encargado de invocar de manera síncrona el modelo Gemini 3.8 Flash en el equipo local desde la consola de Windows.
 * **Mensaje_clasificador_ia.csv:** Archivo utilizado como capa de persistencia y base de datos local. En este repositorio, el `agente_webhook.py` procesa e inyecta los mensajes clasificados en leads calientes, fríos, clientes potenciales y clientes no interesados/curiosos tras la interacción del modelo a través del webhook.
