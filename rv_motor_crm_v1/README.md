@@ -124,7 +124,7 @@ La infraestructura base ha sido aislada por completo dentro del directorio `rv_m
 ---
 
 # 🔒 Buenas Prácticas de Ciberseguridad Aplicadas
-
+---
 Siguiendo las directrices avanzadas de desarrollo seguro en IA, **este proyecto prohíbe estrictamente la exposición de API Keys en el código fuente**:
 * **En desarrollo (Google Colab):** Las llaves se consumen mediante el gestor nativo de secrets (`from google.colab import userdata`).
 * **En producción (Streamlit Cloud):** Las credenciales se inyectan dinámicamente utilizando el entorno cifrado de Streamlit Secrets (`st.secrets`).
@@ -140,13 +140,13 @@ En estricto cumplimiento con el marco de integridad académica de la Maestría e
 ---
 
 ## 🚀 Escalabilidad Comercial Futura
-
+---
 La arquitectura de software propuesta desacopla totalmente el canal de mensajería del motor de IA. Esto garantizará que, tras concluir el módulo académico, el prototipo pueda escalarse e integrarse directamente a los canales de producción reales de la empresa: **WhatsApp Business API (Oficial)**, **Instagram Graph API**, **Facebook Messenger** y CRMs corporativos (como HubSpot,Manychat, Kommo o Zoho CRM) mediante Webhooks estables de alta disponibilidad.
 
 ---
 
 ## 🛠️ Instrucciones de Evaluación para el Docente
-
+---
 En estricto cumplimiento con el marco de integridad académica de la Maestría en IA, se declara formalmente la metodología implementada en el uso de herramientas generativas:
 
 * **Desarrollo y Laboratorio Independiente (Google Colab):** Las fases experimentales de calibración lógica, optimización de hiperparámetros de temperatura, pruebas del prompt de sistema y la inyección sintética del lote inicial de 50 leads se ejecutaron de manera autónoma en cuadernos de Google Colab bajo la estricta autoría intelectual del desarrollador.
