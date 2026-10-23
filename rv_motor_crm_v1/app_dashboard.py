@@ -15,54 +15,48 @@ st.set_page_config(
 @st.cache_data
 def cargar_datos():
     ruta_csv = os.path.join(os.path.dirname(__file__), 'mensajes_clasificados_ia.csv')
-    
+
     if os.path.exists(ruta_csv):
-        # sep=None y engine='python' detectan automáticamente si está separado por comas o tabuladores (\t)
         df_real = pd.read_csv(ruta_csv, sep=None, engine='python')
-        
-        # Limpieza técnica: pasamos los nombres de columnas a minúsculas y quitamos espacios
         df_real.columns = df_real.columns.str.strip().str.lower()
-        
-        # BUSCADOR INTELIGENTE DE COLUMNAS: Mapea la columna de clasificación sin importar cómo se llame
+
         columna_encontrada = None
         posibles_nombres = ['interes_ia', 'interes', 'intencion', 'clasificacion', 'categoria', 'label']
-        
-        # Si Pandas leyó una sola columna por error, renombramos la columna 5 o 6 que corresponde al interés
+
         if len(df_real.columns) > 4:
             for nombre in posibles_nombres:
                 for col in df_real.columns:
                     if nombre in col:
                         columna_encontrada = col
                         break
-        
+
         if columna_encontrada:
             df_real = df_real.rename(columns={columna_encontrada: 'interes_ia'})
         else:
-            # Si no detectó los nombres por el formato, asignamos 'interes_ia' a la quinta columna (índice 4 o 5)
             if len(df_real.columns) >= 5:
                 df_real.rename(columns={df_real.columns[4]: 'interes_ia'}, inplace=True)
-        
-        # Limpieza de filas con errores de cuota (como el RESOURCE_EXHAUSTED de la fila 21)
+
         if 'interes_ia' in df_real.columns:
-            # Asegura que solo se grafiquen estados válidos del negocio
             estados_validos = ['Lead Caliente', 'Lead Frío', 'Cliente Potencial', 'Cliente que Solo Pregunta']
-            # Si hay textos de error de la API, los limpia mapeándolos a 'Lead Frío' o un estado genérico
             df_real['interes_ia'] = df_real['interes_ia'].apply(lambda x: x if str(x).strip() in estados_validos else 'Cliente que Solo Pregunta')
-            
+
         return df_real
-        
-    # Dataframe Sintético de Respaldo Absoluto con tus 4 etiquetas oficiales si el archivo no existe
+
     return pd.DataFrame({
         'cliente': [f'Contacto {i}' for i in range(1, 13)],
         'interes_ia': ['Lead Caliente', 'Lead Frío', 'Cliente Potencial', 'Cliente que Solo Pregunta'] * 3,
         'motivo_semantico': ['Quiere financiar una 150cc', 'Mensaje equivocado', 'Quiere ver motos el sábado', 'Pregunta por horarios'] * 3,
         'respuesta_automatica': ['Claro, aquí tienes los planes...' for _ in range(12)]
     })
-    
+
 df = cargar_datos()
 
-# 3. BARRA LATERAL (Calculadora de ROI y Filtros)
-st.sidebar.image("https://icons8.com", width=80)
+# 3. BARRA LATERAL (Carga de Logo Local y Filtros)
+# Aquí hemos configurado tu logo local de forma nativa
+if os.path.exists("assets/logo_rv.png"):
+    st.sidebar.image("assets/logo_rv.png", width=120)
+else:
+    st.sidebar.image("https://icons8.com", width=80)  # Respaldo temporal si no encuentra la carpeta local
 
 st.sidebar.title("R&V Motor CRM")
 st.sidebar.caption("Módulo de Inteligencia Artificial")
@@ -78,7 +72,6 @@ st.sidebar.subheader("🔍 Filtros del Embudo")
 categorias_reales = ['Lead Caliente', 'Lead Frío', 'Cliente Potencial', 'Cliente que Solo Pregunta']
 categorias_seleccionadas = st.sidebar.multiselect("Clasificación IA:", categorias_reales, default=categorias_reales)
 
-# Filtrado dinámico del dataframe
 df_filtrado = df[df['interes_ia'].isin(categorias_seleccionadas)]
 
 # 4. CUERPO PRINCIPAL
@@ -105,10 +98,8 @@ with col4:
 
 st.markdown("---")
 
-# 6. BLOQUE DE GRÁFICOS (Plotly Express con Etiquetas y Tendencia)
+# 6. BLOQUE DE GRÁFICOS
 st.subheader("📊 Análisis Avanzado de Tráfico y Tendencia")
-
-# Crear pestañas para organizar los gráficos de forma ejecutiva
 tab1, tab2 = st.tabs(["📊 Distribución de Leads", "📈 Tendencia Temporal"])
 
 with tab1:
@@ -116,7 +107,6 @@ with tab1:
     
     with col_graf1:
         st.subheader("Tráfico con Conteo en Barra")
-        # Generamos el conteo ordenado
         df_conteo = df_filtrado['interes_ia'].value_counts().reset_index()
         df_conteo.columns = ['interes_ia', 'count']
         
@@ -126,7 +116,7 @@ with tab1:
             y='count',
             labels={'interes_ia': 'Clasificación IA', 'count': 'Mensajes'},
             color='interes_ia',
-            text='count',  # ¡ESTA LÍNEA PONE EL NÚMERO ENCIMA DE LA BARRA!
+            text='count',
             color_discrete_map={
                 'lead caliente': '#EF553B',
                 'cliente potencial': '#00CC96',
@@ -135,16 +125,15 @@ with tab1:
             },
             template="plotly_dark"
         )
-        # Ajustamos para que el número se posicione afuera/arriba de la barra
         fig_bar.update_traces(textposition='outside')
         fig_bar.update_layout(yaxis=dict(title='Total Mensajes (Eje Y)'))
         st.plotly_chart(fig_bar, use_container_width=True)
-    
+        
     with col_graf2:
         st.subheader("Distribución del Embudo")
         fig_pie = px.pie(
-            df_filtrado, 
-            names='interes_ia', 
+            df_filtrado,
+            names='interes_ia',
             hole=0.4,
             template="plotly_dark",
             color_discrete_sequence=px.colors.qualitative.Pastel
@@ -153,17 +142,12 @@ with tab1:
 
 with tab2:
     st.subheader("📈 Línea de Tendencia Acumulada de Leads")
-    
-    # Verificamos si tu CSV tiene una columna de fecha; si no, simulamos un histórico para la demo
     df_linea = df_filtrado.copy()
     if 'fecha' not in df_linea.columns:
-        # Simulamos fechas consecutivas de los últimos días para tus leads
         import datetime
         base_fecha = datetime.date.today() - datetime.timedelta(days=10)
         df_linea['fecha_simulada'] = [base_fecha + datetime.timedelta(days=i % 10) for i in range(len(df_linea))]
         df_linea = df_linea.sort_values(by='fecha_simulada')
-        
-        # Agrupamos por fecha y tipo de lead para ver la evolución
         df_tendencia = df_linea.groupby(['fecha_simulada', 'interes_ia']).size().reset_index(name='nuevos_leads')
         
         fig_line = px.line(
@@ -171,23 +155,23 @@ with tab2:
             x='fecha_simulada',
             y='nuevos_leads',
             color='interes_ia',
-            markers=True,  # Pone los puntos en cada intersección de la línea
+            markers=True,
             labels={'fecha_simulada': 'Fecha de Recepción', 'nuevos_leads': 'Cantidad de Leads'},
             template="plotly_dark",
             title="Evolución de contactos por día en R&V Motor"
         )
         st.plotly_chart(fig_line, use_container_width=True)
     else:
-        # Si tu CSV real ya tiene fechas, se grafica con tus datos reales de Colab
         df_tendencia = df_linea.groupby(['fecha', 'interes_ia']).size().reset_index(name='nuevos_leads')
         fig_line = px.line(df_tendencia, x='fecha', y='nuevos_leads', color='interes_ia', markers=True, template="plotly_dark")
         st.plotly_chart(fig_line, use_container_width=True)
 
-st.markdown("---")# 7. TABLA DE DATOS INTERACTIVA (Mapeo Blindado de Columnas)
+st.markdown("---")
+
+# 7. TABLA DE DATOS INTERACTIVA
 st.subheader("📋 Registro Histórico e Interacciones del Chatbot")
 
-# Buscador inteligente de columnas para la tabla para evitar KeyErrors
-columnas_tabla = []
+columnas_visibles = {}
 mapeo_columnas = {
     'cliente': ['cliente', 'nombre', 'contacto', 'user', 'id'],
     'interes_ia': ['interes_ia', 'interes', 'intencion', 'clasificacion', 'categoria'],
@@ -195,15 +179,12 @@ mapeo_columnas = {
     'respuesta_automatica': ['respuesta_automatica', 'respuesta', 'bot_response', 'reply']
 }
 
-# Creamos una lista con las columnas reales que existan en tu DataFrame filtrado
-columnas_visibles = {}
 for variable_sistema, sinonimos in mapeo_columnas.items():
     for col in df_filtrado.columns:
         if col in sinonimos:
             columnas_visibles[variable_sistema] = col
             break
 
-# Intentamos proyectar las columnas encontradas; si falta alguna, mostramos las que tengamos disponibles
 if len(columnas_visibles) > 0:
     st.dataframe(
         df_filtrado[list(columnas_visibles.values())],
@@ -211,7 +192,6 @@ if len(columnas_visibles) > 0:
         hide_index=True
     )
 else:
-    # Si por alguna razón técnica extrema no machea, muestra el dataframe filtrado completo sin romperse
     st.dataframe(
         df_filtrado,
         use_container_width=True,
