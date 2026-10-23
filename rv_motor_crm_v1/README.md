@@ -63,7 +63,50 @@ El proyecto se compone de una suite de componentes principales diseñados bajo u
 *En resumen, el objetivo fundamental para el cierre del módulo es que el dashboard refleje con total claridad la clasificación de leads, la tasa de conversión y el ROI estimado de la campaña a partir de las intenciones de compra capturadas por esta infraestructura de red.*
 
 ---
+📊 Motor de Métricas y Fórmulas Financieras
+Para el cierre del módulo y la evaluación del MVP, la suite traduce dinámicamente las interacciones cualitativas por chat en indicadores financieros estratégicos (KPIs) mediante las siguientes reglas matemáticas:
 
+#### 1. Conteo e Identificación de Leads
+El sistema procesa la base de datos local (`mensajes_clasificados_ia.csv`) para contabilizar el volumen del embudo:
+* **Total de Mensajes (Volumen Bruto):** Representa el número total de registros guardados en el DataFrame ($N$).
+* **Leads de Alto Valor:** Sumatoria atómica de los clientes con interés comercial genuino identificados por la IA:
+$$\text{Leads Valorables} = \text{Count}(\text{Lead Caliente}) + \text{Count}(\text{Cliente Potencial})$$
+
+#### 2. Cálculo de la Tasa de Conversión (%)
+Mide la eficiencia del canal digital relacionando los clientes que efectúan una compra o muestran alta intención de cierre frente al volumen total de mensajes recibidos:
+$$\text{Tasa de Conversión} = \left( \frac{\text{Leads Valorables}}{\text{Total de Mensajes}} \right) \times 100$$
+
+#### 3. Modelo Matemático del Retorno de Inversión (ROI)
+Calcula el rendimiento financiero de la campaña publicitaria a partir de un **Costo de Marketing Fijo establecido en \$150.00**. Cada categoría semántica inyecta un ingreso proyectado en el backend que determina la rentabilidad acumulada:
+* Si el Lead es **Caliente**, genera un Ingreso Proyectado de **\$2,500.00**.
+* Si el Lead es **Potencial**, genera un Ingreso Proyectado de **\$1,200.00**.
+* Para cualquier otra categoría, el Ingreso es de **\$0.00**.
+
+La fórmula del ROI del sistema se define como:
+$$\text{ROI} = \left( \frac{\text{Ingreso Estimado Total} - \text{Costo de Marketing}}{\text{Costo de Marketing}} \right) \times 100$$
+
+*Nota técnica: Ante un único 'Lead Caliente' individual, el sistema procesa un valor flotante exacto de **15.66666667**, lo que equivale a un **1566% de ROI** directo frente al costo de inversión.*
+
+📈 Procesamiento Analítico en Frontend (Código Streamlit)
+La lógica de negocio descrita se implementa directamente en `app_dashboard.py` para proyectar las métricas mediante la siguiente estructura de código:
+```python
+total_leads = len(df)
+leads_valorables = len(df[df['interes_ia'].isin(['Lead Caliente', 'Cliente Potencial'])])
+ventas_estimadas = int((leads_valorables * tasa_conversion) / 100)
+ingreso_estimado = ventas_estimadas * valor_moto_promedio
+roi_calculado = ((ingreso_estimado - costo_campana) / costo_campana) * 100 if costo_campana > 0 else 0
+
+# Distribución horizontal de los KPIs con Streamlit Metrics
+col1, col2, col3, col4 = st.columns(4)
+with col1:
+    st.metric(label="📥 Total Mensajes", value=total_leads)
+with col2:
+    st.metric(label="🎯 Leads de Alto Valor", value=leads_valorables, help="Suma de Leads Calientes y Clientes Potenciales")
+with col3:
+    st.metric(label="💰 Ingreso Estimado", value=f"\${ingreso_estimado:,.2f}", delta=f"{ventas_estimadas} Ventas")
+with col4:
+    st.metric(label="📈 ROI Proyectado", value=f"{roi_calculado:.1f}%")
+```
 ## ⚙️ Arquitectura Tecnológica (Hito Semana 1)
 
 La infraestructura base ha sido aislada por completo dentro del directorio `rv_motor_crm/` para garantizar la replicabilidad del contenedor de producción sin alterar las prácticas regulares del aula:
