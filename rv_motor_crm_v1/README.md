@@ -87,7 +87,7 @@ $$\text{ROI} = \left( \frac{\text{Ingreso Estimado Total} - \text{Costo de Marke
 
 *Nota técnica: Ante un único 'Lead Caliente' individual, el sistema procesa un valor flotante exacto de **15.66666667**, lo que equivale a un **1566% de ROI** directo frente al costo de inversión.*
 
-📈 Procesamiento Analítico en Frontend (Código Streamlit)
+## 📈 Procesamiento Analítico en Frontend (Código Streamlit):
 La lógica de negocio descrita se implementa directamente en `app_dashboard.py` para proyectar las métricas mediante la siguiente estructura de código:
 ```python
 total_leads = len(df)
