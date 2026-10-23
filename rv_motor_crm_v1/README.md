@@ -123,7 +123,7 @@ La infraestructura base ha sido aislada por completo dentro del directorio `rv_m
 
 ---
 
-## 🔒 Buenas Prácticas de Ciberseguridad Aplicadas
+# 🔒 Buenas Prácticas de Ciberseguridad Aplicadas
 
 Siguiendo las directrices avanzadas de desarrollo seguro en IA, **este proyecto prohíbe estrictamente la exposición de API Keys en el código fuente**:
 * **En desarrollo (Google Colab):** Las llaves se consumen mediante el gestor nativo de secrets (`from google.colab import userdata`).
