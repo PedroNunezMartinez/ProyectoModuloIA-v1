@@ -143,7 +143,7 @@ La arquitectura de software propuesta desacopla totalmente el canal de mensajer�
 
 ---
 
-🛠️ Instrucciones de Evaluación para el Docente
+# 🛠️ Instrucciones de Evaluación para el Docente
 En estricto cumplimiento con el marco de integridad académica de la Maestría en IA, se declara formalmente la metodología implementada en el uso de herramientas generativas:
 
 * **Desarrollo y Laboratorio Independiente (Google Colab):** Las fases experimentales de calibración lógica, optimización de hiperparámetros de temperatura, pruebas del prompt de sistema y la inyección sintética del lote inicial de 50 leads se ejecutaron de manera autónoma en cuadernos de Google Colab bajo la estricta autoría intelectual del desarrollador.
