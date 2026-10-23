@@ -108,5 +108,5 @@ En estricto cumplimiento con el marco de integridad académica de la Maestría e
 
 Para compilar y visualizar el estado actual del prototipo de la Semana 1 en Streamlit Cloud de forma independiente:
 1. En el panel de control de Streamlit Cloud, cree una nueva aplicación conectada a este repositorio.
-2. En el campo **"Main file path"**, asegúrese de apuntar a la ruta interna: `rv_motor_crm/app_dashboard.py`.
+2. En el campo **"Main file path"**, asegúrese de apuntar a la ruta interna: `rv_motor_crm/app_dashboard.py` y.`rv_motor_crm_v1/app_dashboard.py`
 3. La aplicación se ejecutará de forma aislada, instalando su propio contenedor de dependencias sin alterar la práctica `app.py` ubicada en la raíz del repositorio.
