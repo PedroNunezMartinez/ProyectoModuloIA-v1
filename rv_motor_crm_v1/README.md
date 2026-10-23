@@ -63,7 +63,7 @@ El proyecto se compone de una suite de componentes principales diseñados bajo u
 *En resumen, el objetivo fundamental para el cierre del módulo es que el dashboard refleje con total claridad la clasificación de leads, la tasa de conversión y el ROI estimado de la campaña a partir de las intenciones de compra capturadas por esta infraestructura de red.*
 
 ---
-📊 Motor de Métricas y Fórmulas Financieras
+## 📊 Motor de Métricas y Fórmulas Financieras
 Para el cierre del módulo y la evaluación del MVP, la suite traduce dinámicamente las interacciones cualitativas por chat en indicadores financieros estratégicos (KPIs) mediante las siguientes reglas matemáticas:
 
 #### 1. Conteo e Identificación de Leads
@@ -96,7 +96,7 @@ ventas_estimadas = int((leads_valorables * tasa_conversion) / 100)
 ingreso_estimado = ventas_estimadas * valor_moto_promedio
 roi_calculado = ((ingreso_estimado - costo_campana) / costo_campana) * 100 if costo_campana > 0 else 0
 
-# Distribución horizontal de los KPIs con Streamlit Metrics
+## Distribución horizontal de los KPIs con Streamlit Metrics
 col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.metric(label="📥 Total Mensajes", value=total_leads)
@@ -106,7 +106,7 @@ with col3:
     st.metric(label="💰 Ingreso Estimado", value=f"\${ingreso_estimado:,.2f}", delta=f"{ventas_estimadas} Ventas")
 with col4:
     st.metric(label="📈 ROI Proyectado", value=f"{roi_calculado:.1f}%")
-```
+--
 ## ⚙️ Arquitectura Tecnológica (Hito Semana 1)
 
 La infraestructura base ha sido aislada por completo dentro del directorio `rv_motor_crm/` para garantizar la replicabilidad del contenedor de producción sin alterar las prácticas regulares del aula:
