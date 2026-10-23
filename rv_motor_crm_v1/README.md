@@ -40,6 +40,28 @@ Para garantizar la estabilidad del pipeline analítico y forzar al modelo **Gemi
 El diseño lógico del prompt instruye al agente a evaluar las intenciones de compra y redactar respuestas comerciales automatizadas de forma síncrona. La evidencia técnica de este desarrollo, el manejo de errores (bloques `try-except`) y las pausas controladas para respetar los límites de la API gratuita se encuentran documentados de forma transparente en el cuaderno de desarrollo **`agente_clasificador.ipynb`**, el cual alimenta de manera directa el set de datos enriquecido **`mensajes_clasificados_ia.csv`**.
 
 ---
+🤖 Ingeniería de Prompts & Arquitectura del Agente (Semana 2)
+Para garantizar la estabilidad del pipeline analítico y forzar al modelo Gemini 3.8 Flash a responder en JSON estricto sin romper la estructura de las filas, se diseñó un prompt basado en asignación de rol, restricciones semánticas y control de formato de salida (response_mime_type="application/json").
+
+El diseño lógico del prompt instruye al agente a evaluar las intenciones de compra y redactar respuestas comerciales automatizadas de forma síncrona. La evidencia técnica de este desarrollo, el manejo de errores (bloques try-except) y las pausas controladas para respetar los límites de la API gratuita se encuentran documentados de forma transparente en el cuaderno de desarrollo agente_clasificador.ipynb, el cual alimenta de manera directa el set de datos enriquecido mensajes_clasificados_ia.csv.
+
+🛠️ Ingeniería de Infraestructura y Despliegue Local (Detalle del MVP)
+El proyecto se compone de una suite de componentes principales diseñados bajo un entorno híbrido de ejecución. El componente `agente_webhook.py` no se ejecuta directamente en GitHub, sino en la máquina local del desarrollador con el apoyo de una arquitectura de red segura para simular la interacción que se generaría tras publicar una promoción en redes sociales (Instagram, Facebook y WhatsApp).
+
+#### Componentes de la Suite e Infraestructura Desplegada:
+* **App.py:** Archivo de inicio empleado para desplegar y enlazar la interfaz analítica con Streamlit.
+* **Agente_clasificador.ipynb:** Cuaderno de notas utilizado para generar de forma automatizada 50 interacciones sintéticas con las que se pobló la base de datos inicial del dashboard.
+* **Agente_webhook.py:** Agente encargado de invocar de manera síncrona el modelo Gemini 3.8 Flash en el equipo local desde la consola de Windows.
+* **Mensaje_clasificador_ia.csv:** Archivo utilizado como capa de persistencia y base de datos local. En este repositorio, el `agente_webhook.py` procesa e inyecta los mensajes clasificados en leads calientes, fríos, clientes potenciales y clientes no interesados/curiosos tras la interacción del modelo a través del webhook.
+* **Simulación de la Red Social:** Creación y despliegue de un grupo privado en WhatsApp llamado “Clientes de V&R Motors”, donde se simularon interacciones comerciales controladas con clientes reales (el desarrollador y su esposa).
+* **Integración con Twilio:** Configuración de una cuenta e implementación de un número de prueba (Sandbox) que funciona como puente con WhatsApp, mitigando el riesgo de que Meta bloqueara el tráfico de datos por sospechas de spam automatizado.
+* **Túnel de Comunicación con Ngrok:** Despliegue de un túnel seguro desde la máquina local hacia los servidores de Twilio ejecutado por línea de comandos. Esto generó una URL pública dinámica vinculada al Sandbox de Twilio, superando las restricciones de la conexión residencial y evitando bloqueos del firewall de Windows y del router local.
+* **Prueba en Vivo y Flujo de Datos:** Además de las 50 interacciones iniciales sintéticas, se procesaron en tiempo real 4 o 5 interacciones completas a través de toda esta infraestructura. Los registros enriquecidos se guardaron de manera persistente en el archivo CSV para ser consumidos inmediatamente por el dashboard.
+* **Manejo de Contingencias de la API:** Durante la fase de pruebas en vivo se gestionaron y mitigaron múltiples errores 503 por saturación de la API de Gemini, lo que obligó a implementar ajustes avanzados en los parámetros de reintento (backoff) y la alternancia dinámica entre modelos según la disponibilidad del servicio.
+
+*En resumen, el objetivo fundamental para el cierre del módulo es que el dashboard refleje con total claridad la clasificación de leads, la tasa de conversión y el ROI estimado de la campaña a partir de las intenciones de compra capturadas por esta infraestructura de red.*
+
+
 
 ## ⚙️ Arquitectura Tecnológica (Hito Semana 1)
 
