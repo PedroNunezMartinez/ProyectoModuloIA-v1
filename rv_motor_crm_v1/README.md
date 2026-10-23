@@ -82,7 +82,7 @@ La fórmula del ROI del sistema se define como:
 $$\text{ROI} = \left( \frac{\text{Ingreso Estimado Total} - \text{Costo de Marketing}}{\text{Costo de Marketing}} \right) \times 100$$
 
 *Nota técnica: Ante un único 'Lead Caliente' individual, el sistema procesa un valor flotante exacto de **15.66666667**, lo que equivale a un **1566% de ROI** directo frente al costo de inversión.*
----
+
 ## 📈 Procesamiento Analítico en Frontend (Código Streamlit):
 La lógica de negocio descrita se implementa directamente en `app_dashboard.py` para proyectar las métricas mediante la siguiente estructura de código:
 ```python
@@ -123,7 +123,7 @@ La infraestructura base ha sido aislada por completo dentro del directorio `rv_m
 
 ---
 
-# 🔒 Buenas Prácticas de Ciberseguridad Aplicadas
+## 🔒 Buenas Prácticas de Ciberseguridad Aplicadas
 
 Siguiendo las directrices avanzadas de desarrollo seguro en IA, **este proyecto prohíbe estrictamente la exposición de API Keys en el código fuente**:
 * **En desarrollo (Google Colab):** Las llaves se consumen mediante el gestor nativo de secrets (`from google.colab import userdata`).
