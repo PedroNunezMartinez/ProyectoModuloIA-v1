@@ -53,8 +53,8 @@ df = cargar_datos()
 
 # 3. BARRA LATERAL (Carga de Logo Local y Filtros)
 # Aquí hemos configurado tu logo local de forma nativa
-if os.path.exists("logo_rv.png"):
-    st.sidebar.image("logo_rv.png", width=120)
+if os.path.exists("rv_motor_crm_v1/logo_rv.png"):
+    st.sidebar.image("rv_motor_crm_v1/logo_rv.png", width=120)
 else:
     st.sidebar.image("https://icons8.com", width=80)  # Respaldo temporal si no encuentra la carpeta local
 
