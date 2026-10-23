@@ -62,7 +62,7 @@ def cargar_datos():
 df = cargar_datos()
 
 # 3. BARRA LATERAL (Calculadora de ROI y Filtros)
-st.sidebar.image("https://cdn-icons-png.flaticon.com/512/2966/2966327.png", width=80)
+st.sidebar.image("https://icons8.com", width=80)
 
 st.sidebar.title("R&V Motor CRM")
 st.sidebar.caption("Módulo de Inteligencia Artificial")
@@ -126,7 +126,7 @@ with tab1:
             y='count',
             labels={'interes_ia': 'Clasificación IA', 'count': 'Mensajes'},
             color='interes_ia',
-            text='count',
+            text='count',  # ¡ESTA LÍNEA PONE EL NÚMERO ENCIMA DE LA BARRA!
             color_discrete_map={
                 'lead caliente': '#EF553B',
                 'cliente potencial': '#00CC96',
@@ -171,7 +171,7 @@ with tab2:
             x='fecha_simulada',
             y='nuevos_leads',
             color='interes_ia',
-            markers=True,
+            markers=True,  # Pone los puntos en cada intersección de la línea
             labels={'fecha_simulada': 'Fecha de Recepción', 'nuevos_leads': 'Cantidad de Leads'},
             template="plotly_dark",
             title="Evolución de contactos por día en R&V Motor"
@@ -183,11 +183,10 @@ with tab2:
         fig_line = px.line(df_tendencia, x='fecha', y='nuevos_leads', color='interes_ia', markers=True, template="plotly_dark")
         st.plotly_chart(fig_line, use_container_width=True)
 
-st.markdown("---")
-
-# 7. TABLA DE DATOS INTERACTIVA
+st.markdown("---")# 7. TABLA DE DATOS INTERACTIVA (Mapeo Blindado de Columnas)
 st.subheader("📋 Registro Histórico e Interacciones del Chatbot")
 
+# Buscador inteligente de columnas para la tabla para evitar KeyErrors
 columnas_tabla = []
 mapeo_columnas = {
     'cliente': ['cliente', 'nombre', 'contacto', 'user', 'id'],
@@ -196,6 +195,7 @@ mapeo_columnas = {
     'respuesta_automatica': ['respuesta_automatica', 'respuesta', 'bot_response', 'reply']
 }
 
+# Creamos una lista con las columnas reales que existan en tu DataFrame filtrado
 columnas_visibles = {}
 for variable_sistema, sinonimos in mapeo_columnas.items():
     for col in df_filtrado.columns:
@@ -203,6 +203,7 @@ for variable_sistema, sinonimos in mapeo_columnas.items():
             columnas_visibles[variable_sistema] = col
             break
 
+# Intentamos proyectar las columnas encontradas; si falta alguna, mostramos las que tengamos disponibles
 if len(columnas_visibles) > 0:
     st.dataframe(
         df_filtrado[list(columnas_visibles.values())],
@@ -210,6 +211,7 @@ if len(columnas_visibles) > 0:
         hide_index=True
     )
 else:
+    # Si por alguna razón técnica extrema no machea, muestra el dataframe filtrado completo sin romperse
     st.dataframe(
         df_filtrado,
         use_container_width=True,
