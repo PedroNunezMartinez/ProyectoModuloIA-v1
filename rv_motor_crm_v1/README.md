@@ -130,7 +130,7 @@ Siguiendo las directrices avanzadas de desarrollo seguro en IA, **este proyecto 
 * **En producción (Streamlit Cloud):** Las credenciales se inyectan dinámicamente utilizando el entorno cifrado de Streamlit Secrets (`st.secrets`).
 
 ---
-🤖 Declaración Académica y Salvaguarda de Autoría (Uso Ético de IA)
+## 🤖 Declaración Académica y Salvaguarda de Autoría (Uso Ético de IA)
 En estricto cumplimiento con el marco de integridad académica de la Maestría en IA, se declara formalmente la metodología implementada en el uso de herramientas generativas:
 
 * **Desarrollo y Laboratorio Independiente (Google Colab):** Las fases experimentales de calibración lógica, optimización de hiperparámetros de temperatura, pruebas del prompt de sistema y la inyección sintética del lote inicial de 50 leads se ejecutaron de manera autónoma en cuadernos de Google Colab bajo la estricta autoría intelectual del desarrollador [1.1].
