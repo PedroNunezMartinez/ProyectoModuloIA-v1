@@ -103,7 +103,7 @@ with col3:
 with col4:
     st.metric(label="📈 ROI Proyectado", value=f"{roi_calculado:.1f}%")
 ---
-# ⚙️ Arquitectura Tecnológica (Hito Semana 1)
+## ⚙️ Arquitectura Tecnológica (Hito Semana 1)
 
 La infraestructura base ha sido aislada por completo dentro del directorio `rv_motor_crm/` para garantizar la replicabilidad del contenedor de producción sin alterar las prácticas regulares del aula:
 * `app_dashboard.py`: Archivo principal de la interfaz visual construido sobre **Streamlit**.
