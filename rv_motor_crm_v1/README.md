@@ -16,7 +16,9 @@ El sistema está diseñado para automatizar la atención al cliente y medir el i
 4. **Persistencia e Interfaz de Control:** Las clasificaciones y variables analizadas por la IA se guardan en una base de datos estructurada. Estos datos alimentan dinámicamente un Dashboard en **Streamlit** que calcula de forma automática el Retorno de Inversión (ROI) y muestra gráficamente la salud del embudo de ventas.
 
 ### 📊 Criterios de Clasificación de Leads
+
 El Agente de IA evalúa la semántica de los mensajes y asigna estrictamente una de las siguientes categorías:
+
 * **Lead Caliente:** Alta intención de compra inmediata. Clientes decididos que solicitan métodos de pago, datos de transferencia bancaria o disponibilidad para apartar/retirar un modelo de motocicleta el mismo día.
 * **Cliente Potencial:** Interés real y genuino pero en fase de maduración. Usuarios que solicitan requisitos para planes de financiamiento, créditos de la casa, fichas técnicas o agendan citas para visitar el local físico.
 * **Lead Frío:** Dudas muy vagas, saludos sin continuidad comercial o rechazo explícito por objeciones de costo ("está muy caro gracias", "solo miraba precios", "ok").
@@ -27,12 +29,14 @@ El Agente de IA evalúa la semántica de los mensajes y asigna estrictamente una
 ## 📅 Plan de Ejecución General (4 Semanas)
 
 El proyecto se desarrolla bajo una metodología ágil incremental basada en hitos semanales:
+
 * **Semana 1 (Hito Actual):** Configuración de la infraestructura cloud, entorno aislado de carpetas en GitHub, definición de requerimientos y despliegue del cascarón visual.
 * **Semana 2:** Programación del pipeline del Agente de IA y estructuración del prompt de clasificación en formato JSON estricto mediante Google Colab.
 * **Semana 3:** Diseño e implementación del Dashboard analítico, gráficas dinámicas de Plotly y la calculadora de ROI en Streamlit.
 * **Semana 4:** Evaluación científica del modelo (Métricas académicas y matriz de confusión) e integración final del chat interactivo en tiempo real para la demostración en vivo.
 
 ---
+
 ## 🤖 Ingeniería de Prompts & Arquitectura del Agente (Semana 2)
 
 Para garantizar la estabilidad del pipeline analítico y forzar al modelo **Gemini 3.8 Flash** a responder en JSON estricto sin romper la estructura de las filas, se diseñó un prompt basado en asignación de rol, restricciones semánticas y control de formato de salida (`response_mime_type="application/json"`). 
@@ -46,6 +50,7 @@ El diseño lógico del prompt instruye al agente a evaluar las intenciones de co
 El proyecto se compone de una suite de componentes principales diseñados bajo un entorno híbrido de ejecución. El componente `agente_webhook.py` no se ejecuta directamente en GitHub, sino en la máquina local del desarrollador con el apoyo de una arquitectura de red segura para simular la interacción que se generaría tras publicar una promoción en redes sociales (Instagram, Facebook y WhatsApp).
 
 #### Componentes de la Suite e Infraestructura Desplegada:
+
 * **App.py/app_dashboard.py:** Archivo de inicio empleado para desplegar y enlazar la interfaz analítica con Streamlit.
 * **Agente_clasificador.ipynb:** Cuaderno de notas utilizado para generar de forma automatizada 50 interacciones sintéticas con las que se pobló la base de datos inicial del dashboard.
 * **Agente_webhook.py:** Agente encargado de invocar de manera síncrona el modelo Gemini 3.8 Flash en el equipo local desde la consola de Windows.
@@ -59,32 +64,41 @@ El proyecto se compone de una suite de componentes principales diseñados bajo u
 *En resumen, el objetivo fundamental para el cierre del módulo es que el dashboard refleje con total claridad la clasificación de leads, la tasa de conversión y el ROI estimado de la campaña a partir de las intenciones de compra capturadas por esta infraestructura de red.*
 
 ---
+
 ## 📊 Motor de Métricas y Fórmulas Financieras
+
 Para el cierre del módulo y la evaluación del MVP, la suite traduce dinámicamente las interacciones cualitativas por chat en indicadores financieros estratégicos (KPIs) mediante las siguientes reglas matemáticas:
 
 #### 1. Conteo e Identificación de Leads
+
 El sistema procesa la base de datos local (`mensajes_clasificados_ia.csv`) para contabilizar el volumen del embudo:
+
 * **Total de Mensajes (Volumen Bruto):** Representa el número total de registros guardados en el DataFrame ($N$).
 * **Leads de Alto Valor:** Sumatoria atómica de los clientes con interés comercial genuino identificados por la IA:
-$$\text{Leads Valorables} = \text{Count}(\text{Lead Caliente}) + \text{Count}(\text{Cliente Potencial})$$
+  $$\text{Leads Valorables} = \text{Count}(\text{Lead Caliente}) + \text{Count}(\text{Cliente Potencial})$$
 
 #### 2. Cálculo de la Tasa de Conversión (%)
+
 Mide la eficiencia del canal digital relacionando los clientes que efectúan una compra o muestran alta intención de cierre frente al volumen total de mensajes recibidos:
 $$\text{Tasa de Conversión} = \left( \frac{\text{Leads Valorables}}{\text{Total de Mensajes}} \right) \times 100$$
 
 #### 3. Modelo Matemático del Retorno de Inversión (ROI)
+
 Calcula el rendimiento financiero de la campaña publicitaria a partir de un **Costo de Marketing Fijo establecido en \$150.00**. Cada categoría semántica inyecta un ingreso proyectado en el backend que determina la rentabilidad acumulada:
+
 * Si el Lead es **Caliente**, genera un Ingreso Proyectado de **\$2,500.00**.
 * Si el Lead es **Potencial**, genera un Ingreso Proyectado de **\$1,200.00**.
 * Para cualquier otra categoría, el Ingreso es de **\$0.00**.
 
 La fórmula del ROI del sistema se define como:
 $$\text{ROI} = \left( \frac{\text{Ingreso Estimado Total} - \text{Costo de Marketing}}{\text{Costo de Marketing}} \right) \times 100$$
-
 *Nota técnica: Ante un único 'Lead Caliente' individual, el sistema procesa un valor flotante exacto de **15.66666667**, lo que equivale a un **1566% de ROI** directo frente al costo de inversión.*
 ---
+
 ## 📈 Procesamiento Analítico en Frontend (Código Streamlit):
+
 La lógica de negocio descrita se implementa directamente en `app_dashboard.py` para proyectar las métricas mediante la siguiente estructura de código:
+
 ```python
 total_leads = len(df)
 leads_valorables = len(df[df['interes_ia'].isin(['Lead Caliente', 'Cliente Potencial'])])
@@ -103,55 +117,87 @@ with col3:
 with col4:
     st.metric(label="📈 ROI Proyectado", value=f"{roi_calculado:.1f}%")
 ---
-## ⚙️ Arquitectura Tecnológica (Hito Semana 1)
 
-La infraestructura base ha sido aislada por completo dentro del directorio `rv_motor_crm/` para garantizar la replicabilidad del contenedor de producción sin alterar las prácticas regulares del aula:
-* `app_dashboard.py`: Archivo principal de la interfaz visual construido sobre **Streamlit**.
-* `requirements.txt`: Archivo de configuración que congela las dependencias analíticas y de IA requeridas.
-* `README.md`: Documentación técnica del estado del arte del proyecto (este archivo).
-* **especificacion.md**: Documento de especificación técnica que detalla el problema del usuario (Pedro Núñez), objetivos comerciales, alcances, y el mapeo arquitectónico de las cuatro capas funcionales de R&V Motor.
-* **AGENTS.md**: Manual de gobernanza de agentes para entornos de desarrollo. Contiene las reglas estrictas de desarrollo del backend local (Flask en puerto 5000), bypass de advertencias de Ngrok (`ngrok-skip-browser-warning`), y el blindaje para el Sandbox de Twilio contra el error crítico `21654`.
-* **skills.md**:Especificación técnica de las habilidades analíticas, funciones lógicas y capacidades técnicas estructuradas del agente de orquestación comercial, detallando la lógica de conversión financiera en milisegundos.
+```
 
-### Librerías del Ecosistema
-* **Streamlit (v1.35.0):** Framework para el desarrollo de la interfaz de usuario web.
-* **Pandas (v2.2.2):** Biblioteca de manipulación de estructuras de datos.
-* **Google Generative AI (v0.5.4):** SDK oficial para conectar con los modelos fundacionales de Gemini 3.8 Flash
-* **Plotly (v5.22.0):** Biblioteca gráfica interactiva para analíticas de negocio.
-* **Google GenAI SDK (v1.3.0):** Biblioteca moderna oficial para la invocación estructurada del modelo gemini-3.8-flash [1.1].
-* **Twilio Python SDK:** Framework para la conexión y transmisión atómica del payload mediante webhooks seguros de WhatsApp [1.1].
+Version:1.0StartHTML:0000000105EndHTML:0000049168StartFragment:0000038720EndFragment:0000049128<style></style>
 
----
+## ⚙️ Arquitectura Tecnológica(Hito Semana 1)
 
-# 🔒 Buenas Prácticas de Ciberseguridad Aplicadas
----
-Siguiendo las directrices avanzadas de desarrollo seguro en IA, **este proyecto prohíbe estrictamente la exposición de API Keys en el código fuente**:
-* **En desarrollo (Google Colab):** Las llaves se consumen mediante el gestor nativo de secrets (`from google.colab import userdata`).
-* **En producción (Streamlit Cloud):** Las credenciales se inyectan dinámicamente utilizando el entorno cifrado de Streamlit Secrets (`st.secrets`).
+    La infraestructurabase ha sido aislada por completo dentro del directorio `rv_motor_crm/` paragarantizar la replicabilidad del contenedor de producción sin alterar lasprácticas regulares del aula:
 
----
-## 🤖 Declaración Académica y Salvaguarda de Autoría (Uso Ético de IA)
+    *`app_dashboard.py`: Archivo principal de la interfaz visual construido sobre**Streamlit**.
 
-En estricto cumplimiento con el marco de integridad académica de la Maestría en IA, se declara formalmente la metodología implementada en el uso de herramientas generativas:
+    *`requirements.txt`: Archivo de configuración que congela las dependenciasanalíticas y de IA requeridas.
 
-* **Desarrollo y Laboratorio Independiente (Google Colab):** Las fases experimentales de calibración lógica, optimización de hiperparámetros de temperatura, pruebas del prompt de sistema y la inyección sintética del lote inicial de 50 leads se ejecutaron de manera autónoma en cuadernos de Google Colab bajo la estricta autoría intelectual del desarrollador [1.1].
-* **Uso Controlado de IA como Copiloto Técnico:** Se emplearon asistentes de inteligencia artificial generativa exclusivamente como herramientas de apoyo para la optimización de código base (refactorización de bloques `try-except`), depuración de errores lógicos de indentación (`TabError`) y formateo estructural de los documentos Markdown de especificación técnica [1.1, 1.3].
-* **Gobernanza del Proyecto:** El diseño conceptual del pipeline, la integración de la pasarela local con Flask/Twilio/Ngrok, las ecuaciones de fusión financiera para el cómputo en vivo del Retorno de Inversión (ROI) y la recolección física de evidencias comerciales reales en el Sandbox representan un esfuerzo de ingeniería original e independiente ideado en su totalidad por el autor [1.1, 1.2].
----
+    * `README.md`:Documentación técnica del estado del arte del proyecto (este archivo).
 
-## 🚀 Escalabilidad Comercial Futura
----
-La arquitectura de software propuesta desacopla totalmente el canal de mensajería del motor de IA. Esto garantizará que, tras concluir el módulo académico, el prototipo pueda escalarse e integrarse directamente a los canales de producción reales de la empresa: **WhatsApp Business API (Oficial)**, **Instagram Graph API**, **Facebook Messenger** y CRMs corporativos (como HubSpot,Manychat, Kommo o Zoho CRM) mediante Webhooks estables de alta disponibilidad.
+    * **especificacion.md**:Documento de especificación técnica que detalla el problema del usuario (PedroNúñez), objetivos comerciales, alcances, y el mapeo arquitectónico de lascuatro capas funcionales de R&V Motor.
 
----
+    * **AGENTS.md**:Manual de gobernanza de agentes para entornos de desarrollo. Contiene lasreglas estrictas de desarrollo del backend local (Flask en puerto 5000), bypassde advertencias de Ngrok (`ngrok-skip-browser-warning`), y el blindaje para elSandbox de Twilio contra el error crítico `21654`.
 
-## 🛠️ Instrucciones de Evaluación para el Docente
----
-En estricto cumplimiento con el marco de integridad académica de la Maestría en IA, se declara formalmente la metodología implementada en el uso de herramientas generativas:
+    ***skills.md**:Especificación técnica de las habilidades analíticas, funcioneslógicas y capacidades técnicas estructuradas del agente de orquestacióncomercial, detallando la lógica de conversión financiera en milisegundos.
 
-* **Desarrollo y Laboratorio Independiente (Google Colab):** Las fases experimentales de calibración lógica, optimización de hiperparámetros de temperatura, pruebas del prompt de sistema y la inyección sintética del lote inicial de 50 leads se ejecutaron de manera autónoma en cuadernos de Google Colab bajo la estricta autoría intelectual del desarrollador.
+    ### Librerías delEcosistema
 
-Para compilar y visualizar el estado actual del prototipo de la Semana 1 en Streamlit Cloud de forma independiente:
-1. En el panel de control de Streamlit Cloud, cree una nueva aplicación conectada a este repositorio.
-2. En el campo **"Main file path"**, asegúrese de apuntar a la ruta interna: `rv_motor_crm/app_dashboard.py` y.`rv_motor_crm_v1/app_dashboard.py`
-3. La aplicación se ejecutará de forma aislada, instalando su propio contenedor de dependencias sin alterar la práctica `app.py` ubicada en la raíz del repositorio.
+    * **Streamlit(v1.35.0):** Framework para el desarrollo de la interfaz de usuario web.
+
+    * **Pandas(v2.2.2):** Biblioteca de manipulación de estructuras de datos.
+
+    * **GoogleGenerative AI (v0.5.4):** SDK oficial para conectar con los modelosfundacionales de Gemini 3.8 Flash
+
+    * **Plotly(v5.22.0):** Biblioteca gráfica interactiva para analíticas de negocio.
+
+    * **Google GenAISDK (v1.3.0):** Biblioteca moderna oficial para la invocación estructurada delmodelo gemini-3.8-flash [1.1].
+
+    * **Twilio PythonSDK:** Framework para la conexión y transmisión atómica del payload mediantewebhooks seguros de WhatsApp [1.1].
+
+    ---
+
+  ## 🔒 Buenas Prácticas de Ciberseguridad Aplicadas
+
+    ---
+
+    Siguiendo lasdirectrices avanzadas de desarrollo seguro en IA, **este proyecto prohíbeestrictamente la exposición de API Keys en el código fuente**:
+
+    * **En desarrollo(Google Colab):** Las llaves se consumen mediante el gestor nativo de secrets(`from google.colab import userdata`).
+
+    * **En producción(Streamlit Cloud):** Las credenciales se inyectan dinámicamente utilizando elentorno cifrado de Streamlit Secrets (`st.secrets`).
+
+    ---
+
+    ## 🤖 Declaración Académica y Salvaguarda de Autoría (UsoÉtico de IA)
+
+    En estrictocumplimiento con el marco de integridad académica de la Maestría en IA, sedeclara formalmente la metodología implementada en el uso de herramientasgenerativas:
+
+    * **Desarrollo yLaboratorio Independiente (Google Colab):** Las fases experimentales decalibración lógica, optimización de hiperparámetros de temperatura, pruebas delprompt de sistema y la inyección sintética del lote inicial de 50 leads seejecutaron de manera autónoma en cuadernos de Google Colab bajo la estrictaautoría intelectual del desarrollador [1.1].
+
+    * **Uso Controladode IA como Copiloto Técnico:** Se emplearon asistentes de inteligenciaartificial generativa exclusivamente como herramientas de apoyo para laoptimización de código base (refactorización de bloques `try-except`),depuración de errores lógicos de indentación (`TabError`) y formateoestructural de los documentos Markdown de especificación técnica [1.1, 1.3].
+
+    * **Gobernanza delProyecto:** El diseño conceptual del pipeline, la integración de la pasarelalocal con Flask/Twilio/Ngrok, las ecuaciones de fusión financiera para elcómputo en vivo del Retorno de Inversión (ROI) y la recolección física deevidencias comerciales reales en el Sandbox representan un esfuerzo deingeniería original e independiente ideado en su totalidad por el autor [1.1,1.2].
+
+    ---
+
+    ## 🚀 Escalabilidad Comercial Futura
+
+    ---
+
+    La arquitectura desoftware propuesta desacopla totalmente el canal de mensajería del motor de IA.Esto garantizará que, tras concluir el módulo académico, el prototipo puedaescalarse e integrarse directamente a los canales de producción reales de la empresa:**WhatsApp Business API (Oficial)**, **Instagram Graph API**, **FacebookMessenger** y CRMs corporativos (como HubSpot,Manychat, Kommo o Zoho CRM)mediante Webhooks estables de alta disponibilidad.
+
+    ---
+
+    ## 🛠️Instrucciones de Evaluación para el Docente
+
+    ---
+
+    En estrictocumplimiento con el marco de integridad académica de la Maestría en IA, sedeclara formalmente la metodología implementada en el uso de herramientasgenerativas:
+
+    * **Desarrollo yLaboratorio Independiente (Google Colab):** Las fases experimentales decalibración lógica, optimización de hiperparámetros de temperatura, pruebas delprompt de sistema y la inyección sintética del lote inicial de 50 leads seejecutaron de manera autónoma en cuadernos de Google Colab bajo la estrictaautoría intelectual del desarrollador.
+
+    Para compilar yvisualizar el estado actual del prototipo de la Semana 1 en Streamlit Cloud deforma independiente:
+
+    1. En el panel decontrol de Streamlit Cloud, cree una nueva aplicación conectada a esterepositorio.
+
+    2. En el campo**"Main file path"**, asegúrese de apuntar a la ruta interna:`rv_motor_crm/app_dashboard.py` y.`rv_motor_crm_v1/app_dashboard.py`
+
+    3. La aplicaciónse ejecutará de forma aislada, instalando su propio contenedor de dependenciassin alterar la práctica `app.py` ubicada en la raíz del repositorio.
