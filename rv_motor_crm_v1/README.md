@@ -45,7 +45,7 @@ Para garantizar la estabilidad del pipeline analítico y forzar al modelo Gemini
 
 El diseño lógico del prompt instruye al agente a evaluar las intenciones de compra y redactar respuestas comerciales automatizadas de forma síncrona. La evidencia técnica de este desarrollo, el manejo de errores (bloques try-except) y las pausas controladas para respetar los límites de la API gratuita se encuentran documentados de forma transparente en el cuaderno de desarrollo agente_clasificador.ipynb, el cual alimenta de manera directa el set de datos enriquecido mensajes_clasificados_ia.csv.
 
-🛠️ Ingeniería de Infraestructura y Despliegue Local (Detalle del MVP)
+##🛠️ Ingeniería de Infraestructura y Despliegue Local (Detalle del MVP)
 El proyecto se compone de una suite de componentes principales diseñados bajo un entorno híbrido de ejecución. El componente `agente_webhook.py` no se ejecuta directamente en GitHub, sino en la máquina local del desarrollador con el apoyo de una arquitectura de red segura para simular la interacción que se generaría tras publicar una promoción en redes sociales (Instagram, Facebook y WhatsApp).
 
 #### Componentes de la Suite e Infraestructura Desplegada:
