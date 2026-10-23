@@ -70,6 +70,9 @@ La infraestructura base ha sido aislada por completo dentro del directorio `rv_m
 * `app_dashboard.py`: Archivo principal de la interfaz visual construido sobre **Streamlit**.
 * `requirements.txt`: Archivo de configuración que congela las dependencias analíticas y de IA requeridas.
 * `README.md`: Documentación técnica del estado del arte del proyecto (este archivo).
+* * **especificacion.md**: Documento de especificación técnica que detalla el problema del usuario (Pedro Núñez), objetivos comerciales, alcances, y el mapeo arquitectónico de las cuatro capas funcionales de R&V Motor.
+* **AGENTS.md**: Manual de gobernanza de agentes para entornos de desarrollo. Contiene las reglas estrictas de desarrollo del backend local (Flask en puerto 5000), bypass de advertencias de Ngrok (`ngrok-skip-browser-warning`), y el blindaje para el Sandbox de Twilio contra el error crítico `21654`.
+* **skills.md**: Especificación técnica de las habilidades del agente de orquestación comercial, cubriendo los flujos de entradas, transformación de payloads e inyección atómica a Pandas con formatos tipados.
 
 ### Librerías del Ecosistema
 * **Streamlit (v1.35.0):** Framework para el desarrollo de la interfaz de usuario web.
