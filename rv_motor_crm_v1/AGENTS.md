@@ -5,7 +5,7 @@
 ## Qué es este proyecto
 Un ecosistema inteligente de orquestación comercial y Business Intelligence desarrollado para la concesionaria de motocicletas R&V Motor. Intercepta mensajes entrantes de WhatsApp en tiempo real, los clasifica semánticamente según la intención de compra en menos de 3 segundos usando Gemini, automatiza respuestas persuasivas y computa métricas financieras de Retorno de Inversión (ROI) dinámicas y proyectadas reflejadas en un panel web interactivo.
 
-*Nota de Trazabilidad y Consistencia:* Antes de modificar cualquier funcionalidad, algoritmo, flujo de datos o interfaz de usuario, es de carácter obligatorio revisar, respetar y alinearse estrictamente al diseño técnico y diagramación plasmados en la [Especificación Técnica Oficial del Ecosistema (especificacion.md)](especificacion.md).
+*Nota de Trazabilidad y Consistencia:* Antes de modificar cualquier funcionalidad, algoritmo, flujo de datos o interfaz de usuario, es de carácter obligatorio revisar, respetar y alinearse estrictamente al diseño técnico y diagramación plasmados en la [Especificación Técnica Oficial del Ecosistema (00_especificacion.md)](especificacion.md).
 
 ## Estructura Jerárquica del Repositorio
 ```
