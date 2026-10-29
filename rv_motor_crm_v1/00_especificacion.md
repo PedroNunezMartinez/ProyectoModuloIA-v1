@@ -99,5 +99,5 @@ Para garantizar una experiencia de usuario (UX) corporativa y profesional propia
 
 ## 10. Despliegue
 * **Ruta de Despliegue elegida:** Streamlit Community Cloud acoplada directamente al repositorio público de GitHub (`ProyectoModuloIA/rv_motor_crm_v1`), leyendo de forma dinámica la base de datos distribuida en formato homogéneo.
-* **URL del proyecto en GitHub:** https://github.com/PedroNunezMartinez/ProyectoModuloIA/tree/main/rv_motor_crm_v1
-* **URL del dashboard en producción:** https://rv-motor-crm.streamlit.app
+* **URL del proyecto en GitHub:** https://github.com/PedroNunezMartinez/ProyectoModuloIA-v1/tree/main/rv_motor_crm_v1
+* **URL del dashboard en producción:** proyectomoduloia-v1 ∙ main ∙ rv_motor_crm_v1/app_dashboard.py 
